@@ -1,0 +1,16 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<h1>Всего городов в системе - {{ num_cities }}</h1>
+
+
+<h2>Список</h2>
+  <div>
+      {% for city in cities_list %}
+          <li><a href="{% url 'viewCity' city.id %}"><strong>{{ city.name}}</strong></a></li>
+
+      {% endfor %}
+  </div>
+
+
+{% endblock %}

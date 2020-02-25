@@ -1,0 +1,21 @@
+{% load custom %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+{% block content %}
+    {% for item in list%}
+        <li style="list-style-type: decimal">{{ item }}</li>
+    {% endfor %}
+    <div>
+        {% for item in listj%}
+            <li style="list-style-type: decimal">{{ item|get_item:'titles' }}</li>
+        {% endfor %}
+    </div>
+
+{% endblock %}
+</body>
+</html>

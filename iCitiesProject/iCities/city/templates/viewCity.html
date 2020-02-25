@@ -1,0 +1,14 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+<h2>{{city.name}}</h2>
+  <div>
+      <li><strong>Регион: </strong>{{city.region.name }}</li>
+  </div>
+  <div>
+      <li><strong>Население: </strong>{{city.population}}</li>
+  </div>
+
+
+{% endblock %}
