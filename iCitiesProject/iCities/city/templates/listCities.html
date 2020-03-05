@@ -1,16 +1,54 @@
 {% extends "base_generic.html" %}
-
+{% block title %}
+    Список городов в системе
+{% endblock %} }
 {% block content %}
-<h1>Всего городов в системе - {{ num_cities }}</h1>
+    <div class="row">
+        <div class="col">
+            <h1>Всего городов в системе - {{ num_cities }}</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="p-2"><a class="page-link rounded shadow-sm"
+                                href="{% url 'listCities' 1 %}">Крупнейшие города с численностью населения от 1 млн.
+                человек</a></div>
+            <div class="p-2"><a class="page-link rounded shadow-sm"
+                                href="{% url 'listCities' 2 %}">Крупные города с численностью населения от 250 тыс. до 1
+                млн. человек</a></div>
+            <div class="p-2"><a class="page-link rounded shadow-sm"
+                                href="{% url 'listCities' 3 %}">Большие города с численностью населения от 100 тыс. до
+                250 тыс. человек</a></div>
+            <div class="p-2"><a class="page-link rounded shadow-sm"
+                                href="{% url 'listCities' 4 %}">Средние города с численностью населения от 50 тыс. до
+                100 тыс. человек</a></div>
+            <div class="p-2"><a class="page-link rounded shadow-sm"
+                                href="{% url 'listCities' 5 %}">Малые города с численностью населения от 25 тыс. до 50
+                тыс. человек</a></div>
+            <div class="p-2"><a class="page-link rounded shadow-sm"
+                                href="{% url 'listCities' 6 %}">Малые города с численностью населения от 5 тыс. до 25
+                тыс. человек</a></div>
+            <div class="p-2"><a class="page-link rounded shadow-sm"
+                                href="{% url 'listCities' 7 %}">Малые города с численностью населения до 5 тыс.
+                человек</a></div>
+        </div>
+    </div>
+    <div style="padding-top: 50px ">
+        {% for list_for_let in  cities_list %}
+            <div class="row">
+                <h4 class="col border-bottom border-primary">{{ list_for_let.0 }}</h4>
+            </div>
+            <div class="row">
+                <div class="col d-flex flex-wrap justify-content-start">
+                    {% for city in list_for_let.1 %}
+                        <div class="p-2"><a class="page-link rounded shadow-sm"
+                                            href="{% url 'viewCity' city.id %}">{{ city.name }}</a></div>
+                    {% endfor %}
+                </div>
+            </div>
 
-
-<h2>Список</h2>
-  <div>
-      {% for city in cities_list %}
-          <li><a href="{% url 'viewCity' city.id %}"><strong>{{ city.name}}</strong></a></li>
-
-      {% endfor %}
-  </div>
+        {% endfor %}
+    </div>
 
 
 {% endblock %}
