@@ -1,12 +1,22 @@
 {% extends "base_generic.html" %}
+{% block header %}
+    <script src="https://use.fontawesome.com/53582331c4.js"></script>
+{% endblock %}
 {% block title %}
     Город - {{ city.name }}
 {% endblock %}
 {% block content %}
     <div class="row">
         <div class="col card bg-light" style="padding: 0;">
-            <div class="card-header bg-primary" style="width: 100%;">
+            <div class="card-header bg-primary d-flex flex-row justify-content-between" style="width: 100%;">
                 <div class="h2 card-title " style="color: floralwhite; margin-bottom: 0;">{{ city.name }}</div>
+                <div class="d-flex flex-row justify-content-end">
+                    <a id="toCompare" class="page-link rounded text-primary  mr-1" style="display: none"><i
+                            class="a fa fa-balance-scale"></i></a>
+                    <button name="btnCompare" class="btn btn-light text-primary font-italic" onclick="clickBth(this)"
+                            value="{{ city.id }}">Добавить к сравнению
+                    </button>
+                </div>
             </div>
             <div class="card-body">
                 <ul class="list-group">
@@ -23,6 +33,10 @@
     <div class="row p-2 pt-5">
         <div class="col">
             <h5>Всего</h5>
+            <div class="d-flex flex-row justify-content-between ">
+                <p class="mb-0 text-secondary">0</p>
+                <p class="mb-0 text-secondary">{{ perfect }}</p>
+            </div>
             <div class="progress" style=" border: thistle solid; height: 40px">
                 <div class="progress-bar bg-success align-self-center align-items-center"
                      style="width: {% widthratio total perfect 100 %}%; height: 40px;">Всего {{ total }}б.
@@ -30,25 +44,45 @@
             </div>
         </div>
     </div>
-    <div class="row p-2 pt-5 justify-content-around">
+    {% for key in listInd.keys %}
 
-        {% for ind in listInd %}
-            <div class="col-sm-auto mx-4" style="max-width: 300px">
-                <div class="progress rounded-circle mr-0" style="border: thistle solid; height: 250px; width: 250px">
-                    <div class="progress-bar bg-info h4"
-                         style="height: {% widthratio ind.valueDec 1 10 %}%; width: 100%; position: relative; top: 100%; transform: translateY(-100%)">{{ ind.valueDec }}б
+        <div class="row p-2 pt-5">
+            <div class="col">
+                <div class="d-flex flex-row justify-content-start">
+                    <h5 class="m-0 font-italic">{{ key }}</h5>
+                    <button class="btn btn-sm btn btn-link" value="listInd{{ forloop.counter }}"
+                            onclick="hideBlock(this)">
+                        <i class="fa fa-angle-down"></i> Подробнее
+                    </button>
+                </div>
+                <div class="d-flex flex-row justify-content-between ">
+                    <p class="mb-0 text-secondary">0</p>
+                    <p class="mb-0 text-secondary">{{ perfectCategory|get_item:key }}</p>
+                </div>
+                <div class="progress" style=" border: thistle solid; height: 25px">
+                    <div class="progress-bar bg-info align-self-center align-items-center"
+                         style="width: {% widthratio totalCategory|get_item:key perfectCategory|get_item:key 100 %}%; height: 25px;">{{ totalCategory|get_item:key }}б.
                     </div>
                 </div>
-                <div class="text-center font-italic">{{ ind.indicator.name }}</div>
             </div>
+        </div>
 
+        <div class="row p-2 pt-5 justify-content-around" id="listInd{{ forloop.counter }}" style="display: none">
+            {% for ind in listInd|get_item:key %}
+                <div class="col-sm-auto mx-4" style="max-width: 300px">
+                    <div class="progress rounded-circle mr-0"
+                         style="border: thistle solid; height: 250px; width: 250px">
+                        <div class="progress-bar bg-info h4"
+                             style="height: {% widthratio ind.valueDec 1 10 %}%; width: 100%; position: relative; top: 100%; transform: translateY(-100%)">{{ ind.valueDec }}б
+                        </div>
+                    </div>
+                    <div class="text-center font-italic">{{ ind.indicator.name }}</div>
+                </div>
+            {% endfor %}
+        </div>
 
-        {% endfor %}
+    {% endfor %}
 
-    </div>
-    <div class="row ">
-
-    </div>
 
 
 

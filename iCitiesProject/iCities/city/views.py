@@ -54,13 +54,25 @@ def viewCity(request, city_id):
     Функция отображения страниц городов.
     """
     print(city_id)
+    category = CategoryIdicators.objects.all()
     city = City.objects.get(id=city_id)
-    indic = ListIndicators.objects.filter(city=city)
+    indicators = {}
     total = 0
+    totalCategory = {}
     perfTotal = 0
-    for i in indic:
-        total += i.valueDec
-        perfTotal += 1
+    perfTotalCategory = {}
+    for c in category:
+        temp = ListIndicators.objects.filter(indicator__category=c, city=city).order_by("indicator__num")
+        indicators[c.name] = temp
+        totalTemp = 0
+        perfTotalTemp = 0
+        for i in temp:
+            totalTemp += i.valueDec
+            perfTotalTemp += 1
+        perfTotal += perfTotalTemp
+        totalCategory[c.name] = totalTemp
+        total += totalTemp
+        perfTotalCategory[c.name] = perfTotalTemp * 10
     perfTotal *= 10
     print("Cities -", city.name)
     print(request.path)
@@ -69,7 +81,8 @@ def viewCity(request, city_id):
     return render(
         request,
         'viewCity.html',
-        context={'city': city, "listInd": indic.order_by("indicator__num"), "total": total, "perfect": perfTotal},
+        context={'city': city, "listInd": indicators, "total": total, "totalCategory": totalCategory,
+                 "perfect": perfTotal, "perfectCategory": perfTotalCategory},
     )
 
 
@@ -77,22 +90,33 @@ def compareCity(request, city1_id, city2_id):
     """
     Функция отображения сравнения городов.
     """
-    city1 = City.objects.get(id=city1_id)
-    city2 = City.objects.get(id=city2_id)
-
-    print("Cities -", city1.name)
+    cities = []
+    cities.append(City.objects.get(id=city1_id))
+    cities.append(City.objects.get(id=city2_id))
     print(request.path)
+    total = []
+    perfTotal = 0
+    indicators = []
+    for city in cities:
+        indic = ListIndicators.objects.filter(city=city).order_by("indicator__num")
+        indicators.append(indic)
+        perfTotal = 0
+        totaltmp = 0
+        for i in indic:
+            totaltmp += i.valueDec
+            perfTotal += 1
+        total.append(totaltmp)
+    perfTotal *= 10
     # Отрисовка HTML-шаблона index.html с данными внутри
     # переменной контекста context
     return render(
         request,
         'compareCity.html',
-        context={'city1': city1, 'city2': city2, },
+        context={'cities': cities, "listInd": indicators, "total": total, "perfect": perfTotal},
     )
 
 
 def updateListCities(request):
-
     for city in City.objects.all():
         if ListIndicators.objects.filter(city=city, indicator__num=3).exists() is False:
             ListIndicators(city=city, indicator=Indicator.objects.get(num=3),
@@ -100,7 +124,6 @@ def updateListCities(request):
 
     list = ListIndicators.objects.all()
 
-    
     for i in TypeCity.objects.all():
         toDecSystem(3, i.id)
 
@@ -145,13 +168,14 @@ def deleteDupData(request):
     for city in City.objects.values_list('name', flat=True).distinct():
         City.objects.filter(pk__in=City.objects.filter(name=city).values_list('id', flat=True)[1:]).delete()
     """
-    l = ListIndicators.objects.all().delete()
+    # l = ListIndicators.objects.all().delete()
     pass
 
 
 def toDecSystem(ind, typeCity):
     for climate in ['C', 'D']:
-        allList = ListIndicators.objects.filter(indicator__num=ind).filter(city__typeCity=typeCity).filter(city__climate=climate)
+        allList = ListIndicators.objects.filter(indicator__num=ind).filter(city__typeCity=typeCity).filter(
+            city__climate=climate)
         data = []
         for i in list(allList.values_list("value")):
             data.append(i[0])

@@ -1,22 +1,72 @@
 {% extends "base_generic.html" %}
-
+{% block header %}
+    <script src="https://use.fontawesome.com/53582331c4.js"></script>
+{% endblock %}
 {% block title %}
     Сравнение городов:{{ city1.name }} и {{ city2.name }}
 {% endblock %}
 {% block content %}
 
 
-    <div style="display: block;">
-          <div style="display: inline-block; margin: 20px; min-width: 25%">
-              <h2>{{ city1.name}}</h2>
-              <li><strong>Население: </strong>{{city1.population}}</li>
-          </div>
+    <div class="row d-flex justify-content-between">
+        {% for city in cities %}
+            <div class="col-sm card bg-light m-1" style="padding: 0;">
+                <div class="card-header bg-primary d-flex flex-row justify-content-between" style="width: 100%;">
+                    <div class="h2 card-title " style="color: floralwhite; margin-bottom: 0;">{{ city.name }}</div>
+                    {% if cities.1 == city %}
+                        <a href="{% url 'listCities' %}" class="page-link rounded text-primary mr-1" onclick="deleteCookie('id_cities')">
+                            <i class="fa fa-trash"></i>
+                        </a>
 
-
-          <div style="display: inline-block; margin: 20px; min-width: 25%">
-              <h2>{{ city2.name}}</h2>
-              <li><strong>Население: </strong>{{city2.population}}</li>
-          </div>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        <li class="list-group-item"><strong>Регион: </strong>{{ city.region.name }}</li>
+                        <li class="list-group-item"><strong>Группа: </strong>{{ city.typeCity }}</li>
+                        <li class="list-group-item"><strong>Население: </strong>{{ city.population }}</li>
+                        <li class="list-group-item"><strong>Климат: </strong>{% if city.climate == 'C' %}
+                            Комфортный{% else %}Дискомфортный{% endif %}</li>
+                    </ul>
+                </div>
+            </div>
+        {% endfor %}
     </div>
+    <div class="row p-2 pt-5">
+        <div class="col">
+            <h5>Всего</h5>
+
+            <div class="d-flex flex-row justify-content-between ">
+                <p class="mb-0 small text-secondary">Max - {{ perfect }}</p>
+            </div>
+            <div class="progress" style=" border: thistle solid; height: 40px">
+                <div class="progress-bar bg-success align-self-center align-items-center"
+                     style="width: {% widthratio total.0 total.0|add:total.1 100 %}%; height: 40px;">{{ cities.0 }}
+                    - {{ total.0 }}б.
+                </div>
+                <div class="progress-bar bg-warning align-self-center align-items-center"
+                     style="width: {% widthratio total.1 total.0|add:total.1 100 %}%; height: 40px;">{{ cities.1 }}
+                    - {{ total.1 }}б.
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row p-2 pt-5 justify-content-around">
+
+        {% for ind in listInd %}
+            <div class="col-sm-auto mx-4" style="max-width: 300px">
+                <div class="progress rounded-circle mr-0" style="border: thistle solid; height: 250px; width: 250px">
+                    <div class="progress-bar bg-info h4"
+                         style="height: {% widthratio ind.valueDec 1 10 %}%; width: 100%; position: relative; top: 100%; transform: translateY(-100%)">{{ ind.valueDec }}б
+                    </div>
+                </div>
+                <div class="text-center font-italic">{{ ind.indicator.name }}</div>
+            </div>
+
+
+        {% endfor %}
+
+    </div>
+
 
 {% endblock %}
