@@ -57,6 +57,7 @@ class Indicator(models.Model):
     formuls = models.CharField(max_length=50)
     param = models.TextField()
     category = models.ForeignKey(CategoryIdicators, on_delete=models.SET_NULL, null=True)
+
     def __str__(self):
         return str(self.num) + "-" + self.name
 
@@ -73,10 +74,45 @@ class ListIndicators(models.Model):
     date = models.DateTimeField(default=now, blank=True)
 
     def __str__(self):
-        return self.indicator.name + " " + self.city.name
+        return self.indicator.__str__() + " " + self.city.name
 
     def getVal(self):
         return self.value
 
     def getValDec(self):
         return self.valueDec
+
+    def getListbyCategories(city):
+        list = {}
+        categories = CategoryIdicators.objects.all()
+        for category in categories:
+            if ListIndicators.objects.filter(indicator__category=category, city=city).order_by(
+                    "indicator__num").exists():
+                list[category.name] = ListIndicators.objects.filter(indicator__category=category, city=city).order_by(
+                    "indicator__num")
+        return list
+
+    def getListforCompare(city1, city2):
+        list = {}
+        sumVal = {}
+        cities = City.objects.filter(id__in=[city1, city2]).order_by("name")
+        print(cities)
+        categories = CategoryIdicators.objects.all()
+        indicators = Indicator.objects.all()
+        for category in categories:
+            listbyIndicators = {}
+            sumValbyIndicators = {}
+            for indicator in indicators.filter(category=category):
+                listbyCities = {}
+                for city in cities:
+                    if ListIndicators.objects.filter(city=city, indicator=indicator).exists():
+                        listbyCities[city.name] = ListIndicators.objects.filter(city=city, indicator=indicator).order_by("indicator__num")
+                if listbyCities.__len__() != 0:
+                    listbyIndicators[indicator.name] = listbyCities
+                    sumValbyIndicators[indicator.name] = 0
+                    for i in listbyIndicators[indicator.name].values():
+                        sumValbyIndicators[indicator.name] += i[0].getValDec()
+            if listbyIndicators.__len__() != 0:
+                    list[category.name] = listbyIndicators
+                    sumVal[category.name] = sumValbyIndicators
+        return list, sumVal

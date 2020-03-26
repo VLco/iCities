@@ -1,9 +1,10 @@
 {% extends "base_generic.html" %}
+{% load custom %}
 {% block header %}
     <script src="https://use.fontawesome.com/53582331c4.js"></script>
 {% endblock %}
 {% block title %}
-    Сравнение городов:{{ city1.name }} и {{ city2.name }}
+    Сравнение городов:{{ cities.0.name }} и {{ cities.1.name }}
 {% endblock %}
 {% block content %}
 
@@ -14,7 +15,8 @@
                 <div class="card-header bg-primary d-flex flex-row justify-content-between" style="width: 100%;">
                     <div class="h2 card-title " style="color: floralwhite; margin-bottom: 0;">{{ city.name }}</div>
                     {% if cities.1 == city %}
-                        <a href="{% url 'listCities' %}" class="page-link rounded text-primary mr-1" onclick="deleteCookie('id_cities')">
+                        <a href="{% url 'listCities' %}" class="page-link rounded text-primary mr-1"
+                           onclick="deleteCookie('id_cities')">
                             <i class="fa fa-trash"></i>
                         </a>
 
@@ -51,22 +53,72 @@
             </div>
         </div>
     </div>
-    <div class="row p-2 pt-5 justify-content-around">
+    {#    {% for key in listInd.0.keys %}#}
+    {#        {% with totalCategory.1|get_item:key as tCategory1 %}#}
+    {#            <div class="progress" style=" border: thistle solid; height: 25px">#}
+    {#                <div class="progress-bar bg-info align-self-center align-items-center"#}
+    {#                     style="width: {% widthratio totalCategory.0|get_item:key totalCategory.0|get_item:key|add:tCategory1 100 %}%; height: 25px;">{{ totalCategory.0|get_item:key }}б.#}
+    {#                </div>#}
+    {#                <div class="progress-bar bg-info align-self-center align-items-center"#}
+    {#                     style="width: {% widthratio totalCategory.1|get_item:key totalCategory.0|get_item:key|add:tCategory1 100 %}%; height: 25px;">{{ totalCategory.1|get_item:key }}б.#}
+    {#                </div>#}
+    {#            </div>#}
+    {#        {% endwith %}#}
+    {#    {% endfor %}#}
 
-        {% for ind in listInd %}
-            <div class="col-sm-auto mx-4" style="max-width: 300px">
-                <div class="progress rounded-circle mr-0" style="border: thistle solid; height: 250px; width: 250px">
-                    <div class="progress-bar bg-info h4"
-                         style="height: {% widthratio ind.valueDec 1 10 %}%; width: 100%; position: relative; top: 100%; transform: translateY(-100%)">{{ ind.valueDec }}б
-                    </div>
+    {% for category in listInd %}
+        <div class="row p-2 pt-5">
+            <div class="col">
+                <div class="d-flex flex-row justify-content-start">
+                    <h5 class="m-0 font-italic">{{ category }}</h5>
+                    <button class="btn btn-sm btn btn-link" value="listInd{{ forloop.counter }}"
+                            onclick="hideBlock(this)">
+                        <i class="fa fa-angle-down"></i> Подробнее
+                    </button>
                 </div>
-                <div class="text-center font-italic">{{ ind.indicator.name }}</div>
+                <div class="d-flex flex-row justify-content-between ">
+                    <p class="mb-0 text-secondary">0</p>
+                    <p class="mb-0 text-secondary">{{ perfectCategory|get_item:category }}</p>
+                </div>
+                {% with totalCategory.0|get_item:category as tCategory0 %}
+                    <div class="progress" style=" border: thistle solid; height: 25px">
+                        <div class="progress-bar bg-info align-self-center align-items-center"
+                             style="width: {% widthratio totalCategory.0|get_item:category totalCategory.1|get_item:category|add:tCategory0 100 %}%; height: 25px;">{{ totalCategory.0|get_item:category }}б.
+                        </div>
+                        <div class="progress-bar bg-danger align-self-center align-items-center"
+                             style="width: {% widthratio totalCategory.1|get_item:category totalCategory.1|get_item:category|add:tCategory0 100 %}%; height: 25px;">{{ totalCategory.1|get_item:category }}б.
+                        </div>
+                    </div>
+                {% endwith %}
             </div>
+        </div>
+        <div class="row p-2 pt-5 justify-content-around" id="listInd{{ forloop.counter }}" style="display: none">
+            <div class="col mx-4">
+                {% for ind in listInd|get_item:category %}
+                    <div class="progress" style=" border: thistle solid; height: 20px">
+                        {% with sumVal|get_item:category|get_item:ind as sum %}
+                            {% for city in listInd|get_item:category|get_item:ind %}
+                                {% for indCity in listInd|get_item:category|get_item:ind|get_item:city %}
+                                    <div class="progress-bar {% if city == cities.0.name %}bg-info{% else %}bg-danger{% endif %} align-self-center align-items-center"
+                                         style="width: {% widthratio indCity.getValDec sum 100 %}%; height: 20px;">{{ indCity.getValDec }}б.
+                                    </div>
 
-
+                                {% endfor %}
+                            {% endfor %}
+                        {% endwith %}
+                    </div>
+                    <div class="mt-2 mb-3 text-center font-italic">{{ ind }}</div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endfor %}
+    {% for category in listInd %}
+        {% for ind in listInd|get_item:category %}
+            {% for City in listInd|get_item:category|get_item:ind %}
+                {% for indCity in City %}
+                    {{ indCity.getValDec }}
+                {% endfor %}
+            {% endfor %}
         {% endfor %}
-
-    </div>
-
-
+    {% endfor %}
 {% endblock %}

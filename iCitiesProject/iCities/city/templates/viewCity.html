@@ -1,4 +1,5 @@
 {% extends "base_generic.html" %}
+{% load custom %}
 {% block header %}
     <script src="https://use.fontawesome.com/53582331c4.js"></script>
 {% endblock %}
@@ -71,12 +72,12 @@
             {% for ind in listInd|get_item:key %}
                 <div class="col-sm-auto mx-4" style="max-width: 300px">
                     <div class="progress rounded-circle mr-0"
-                         style="border: thistle solid; height: 250px; width: 250px">
-                        <div class="progress-bar bg-info h4"
-                             style="height: {% widthratio ind.valueDec 1 10 %}%; width: 100%; position: relative; top: 100%; transform: translateY(-100%)">{{ ind.valueDec }}б
+                         style="background-color: snow; border: goldenrod solid; height: 250px; width: 250px">
+                        <div class="progress-bar h4"
+                             style="background-color: gold; height: {% widthratio ind.valueDec 1 10 %}%; width: 100%; position: relative; top: 100%; transform: translateY(-100%) ">{{ ind.valueDec }}б
                         </div>
                     </div>
-                    <div class="text-center font-italic">{{ ind.indicator.name }}</div>
+                    <div class="mt-2 text-center font-italic">{{ ind.indicator.name }}</div>
                 </div>
             {% endfor %}
         </div>

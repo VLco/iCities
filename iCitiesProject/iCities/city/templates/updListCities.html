@@ -8,7 +8,7 @@
 <body>
 {% block content %}
     {% for item in lI%}
-        <li style="list-style-type: decimal">{{ item.city }} - {{ item.indicator.name }} -- {{ item.valueDec }}</li>
+        <li style="list-style-type: none">{{ item|get_item:"indicator__num"}} - {{ item|get_item:'indicator__name' }}</li>
     {% endfor %}
 
 {% endblock %}

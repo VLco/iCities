@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from .models import *
 from django.utils.timezone import now
+from django.db.models import Count, QuerySet
 
 import csv, io, json
 import os.path
@@ -56,23 +57,21 @@ def viewCity(request, city_id):
     print(city_id)
     category = CategoryIdicators.objects.all()
     city = City.objects.get(id=city_id)
-    indicators = {}
+    indicators = ListIndicators.getListbyCategories(city)
     total = 0
     totalCategory = {}
     perfTotal = 0
     perfTotalCategory = {}
     for c in category:
-        temp = ListIndicators.objects.filter(indicator__category=c, city=city).order_by("indicator__num")
-        indicators[c.name] = temp
-        totalTemp = 0
-        perfTotalTemp = 0
-        for i in temp:
-            totalTemp += i.valueDec
-            perfTotalTemp += 1
-        perfTotal += perfTotalTemp
-        totalCategory[c.name] = totalTemp
-        total += totalTemp
-        perfTotalCategory[c.name] = perfTotalTemp * 10
+        totalCategory[c.name] = 0
+        perfTotalCategory[c.name] = 0
+        if indicators.get(c.name) is not None:
+            for i in indicators[c.name]:
+                totalCategory[c.name] += i.valueDec
+                perfTotalCategory[c.name] += 1
+            perfTotal += perfTotalCategory[c.name]
+            total += totalCategory[c.name]
+            perfTotalCategory[c.name] *= 10
     perfTotal *= 10
     print("Cities -", city.name)
     print(request.path)
@@ -94,38 +93,53 @@ def compareCity(request, city1_id, city2_id):
     cities.append(City.objects.get(id=city1_id))
     cities.append(City.objects.get(id=city2_id))
     print(request.path)
-    total = []
-    perfTotal = 0
+    category = CategoryIdicators.objects.all()
     indicators = []
+    total = {}
+    perfTotal = 0
+    perfTotalCategory = {}
+    tmp = []
     for city in cities:
-        indic = ListIndicators.objects.filter(city=city).order_by("indicator__num")
-        indicators.append(indic)
-        perfTotal = 0
-        totaltmp = 0
-        for i in indic:
-            totaltmp += i.valueDec
-            perfTotal += 1
-        total.append(totaltmp)
-    perfTotal *= 10
+        total[city.id] = 0
+        totalCategory = {}
+        for c in category:
+            indicators.append(ListIndicators.getListbyCategories(city))
+            totalCategory[c.name] = 0
+            perfTotalCategory[c.name] = 0
+            if indicators[len(indicators) - 1].get(c.name) is not None:
+                for i in indicators[len(indicators) - 1][c.name]:
+                    totalCategory[c.name] += i.getValDec()
+                    perfTotalCategory[c.name] += 1
+                perfTotal += perfTotalCategory[c.name]
+                total[city.id] += totalCategory[c.name]
+                perfTotalCategory[c.name] *= 10
+        tmp.append(totalCategory)
+    indicators, sumval = ListIndicators.getListforCompare(city1_id, city2_id)
+    perfTotal *= 5
+    total = [total[cities[0].id], total[cities[1].id]]
     # Отрисовка HTML-шаблона index.html с данными внутри
     # переменной контекста context
     return render(
         request,
         'compareCity.html',
-        context={'cities': cities, "listInd": indicators, "total": total, "perfect": perfTotal},
+        context={'cities': cities, "listInd": indicators, "total": total, "totalCategory": tmp,
+                 "perfect": perfTotal, "perfectCategory": perfTotalCategory, "sumVal": sumval,},
     )
 
 
 def updateListCities(request):
+    num = 36
     for city in City.objects.all():
-        if ListIndicators.objects.filter(city=city, indicator__num=3).exists() is False:
-            ListIndicators(city=city, indicator=Indicator.objects.get(num=3),
-                           value=np.random.triangular(45, 55, 95)).save()
+        if ListIndicators.objects.filter(city=city, indicator__num=num).exists() is False:
+            ListIndicators(city=city, indicator=Indicator.objects.get(num=num),
+                           value=np.random.triangular(30, 60, 90)).save()
 
-    list = ListIndicators.objects.all()
+    list = ListIndicators.objects.filter(indicator__num=num)
 
     for i in TypeCity.objects.all():
-        toDecSystem(3, i.id)
+        toDecSystem(num, i.id)
+
+    list = ListIndicators.objects.values('indicator__num', 'indicator__name').annotate(Count('indicator')).order_by('indicator__num')
 
     """ 
     
@@ -157,7 +171,7 @@ def updateListCities(request):
     return render(
         request,
         'updListCities.html',
-        context={"lI": list.order_by("city__name"), },
+        context={"lI": list, },
     )
 
     pass
@@ -168,7 +182,7 @@ def deleteDupData(request):
     for city in City.objects.values_list('name', flat=True).distinct():
         City.objects.filter(pk__in=City.objects.filter(name=city).values_list('id', flat=True)[1:]).delete()
     """
-    # l = ListIndicators.objects.all().delete()
+    #l = ListIndicators.objects.filter(indicator__num=8).delete()
     pass
 
 
