@@ -95,7 +95,7 @@ class ListIndicators(models.Model):
     def getListforCompare(city1, city2):
         list = {}
         sumVal = {}
-        cities = City.objects.filter(id__in=[city1, city2]).order_by("name")
+        cities = City.objects.filter(id__in=[city1, city2])
         print(cities)
         categories = CategoryIdicators.objects.all()
         indicators = Indicator.objects.all()

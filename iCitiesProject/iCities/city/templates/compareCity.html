@@ -82,12 +82,11 @@
                 </div>
                 {% with totalCategory.0|get_item:category as tCategory0 %}
                     <div class="progress" style=" border: thistle solid; height: 25px">
-                        <div class="progress-bar bg-info align-self-center align-items-center"
-                             style="width: {% widthratio totalCategory.0|get_item:category totalCategory.1|get_item:category|add:tCategory0 100 %}%; height: 25px;">{{ totalCategory.0|get_item:category }}б.
-                        </div>
-                        <div class="progress-bar bg-danger align-self-center align-items-center"
-                             style="width: {% widthratio totalCategory.1|get_item:category totalCategory.1|get_item:category|add:tCategory0 100 %}%; height: 25px;">{{ totalCategory.1|get_item:category }}б.
-                        </div>
+                        {% for totalCat in totalCategory %}
+                            <div class="progress-bar {% if totalCat == totalCategory.0 %}bg-info{% else %}bg-danger{% endif %} align-self-center align-items-center"
+                                 style="width: {% widthratio totalCat|get_item:category totalCategory.1|get_item:category|add:tCategory0 100 %}%; height: 25px;">{{ totalCat|get_item:category }}б.
+                            </div>
+                        {% endfor %}
                     </div>
                 {% endwith %}
             </div>
