@@ -2,6 +2,7 @@ from django.shortcuts import render
 from .models import *
 from django.utils.timezone import now
 from django.db.models import Count, QuerySet
+from .forms import *
 
 import csv, io, json
 import os.path
@@ -10,7 +11,7 @@ import pandas as pd, numpy as np
 
 # Create your views here.
 
-def listCities(request, typeList=0):
+def listCities(request, typeCity=0):
     """
     Функция отображения каталога городов.
     ////////////////////////////////////
@@ -26,9 +27,9 @@ def listCities(request, typeList=0):
     """
     num_cities = City.objects.all().count()
     cities = None
-    if typeList in range(1, 8):
-        cities = City.objects.filter(typeCity__id=typeList)
-    elif typeList is 0:
+    if typeCity in range(1, 8):
+        cities = City.objects.filter(typeCity__id=typeCity)
+    elif typeCity is 0:
         cities = City.objects.all()
     cities = cities.order_by("name")
     listC = dict()
@@ -85,6 +86,64 @@ def viewCity(request, city_id):
     )
 
 
+def ratingList(request):
+    """
+    Функция отображения рейтинга
+    """
+    types = ListFilter.typeCities(request.POST or None)
+    clim = ListFilter.climate(request.POST or None, initial={'climate': 'ALL'})
+    climate = 0
+    typeCity = 0
+    if request.method == "POST" and types.is_valid() and clim.is_valid():
+        typeCity = list()
+        print(request.POST)
+        if 'ALL' not in request.POST.get('climate'):
+            climate = request.POST.get('climate')
+
+        if request.POST.get('all', False):
+            typeCity.append(0)
+        if request.POST.get('t1', False):
+            typeCity.append(1)
+        if request.POST.get('t2', False):
+            typeCity.append(2)
+        if request.POST.get('t3', False):
+            typeCity.append(3)
+        if request.POST.get('t4', False):
+            typeCity.append(4)
+        if request.POST.get('t5', False):
+            typeCity.append(5)
+        if request.POST.get('t6', False):
+            typeCity.append(6)
+        if request.POST.get('t7', False):
+            typeCity.append(7)
+    if typeCity is not 0 and climate is not 0:
+        cities = City.objects.filter(typeCity__id__in=typeCity, climate__in=climate)
+    elif typeCity is not 0:
+        cities = City.objects.filter(typeCity__id__in=typeCity)
+    elif climate is not 0:
+        cities = City.objects.filter(climate__in=climate)
+    else:
+        cities = City.objects.all()
+    d = dict()
+
+    for city in cities:
+        total = 0
+        for ind in ListIndicators.objects.filter(city=city):
+            total += ind.getValDec()
+        d[city] = total
+    tmp = list(d.items())
+    tmp.sort(key=lambda i: i[1])
+    tmp.reverse()
+    li = dict(tmp)
+    print(li)
+    return render(
+        request=request,
+        template_name='ratingCities.html',
+        context={"list": li, 'clim': clim, 'types': types, },
+    )
+    pass
+
+
 def compareCity(request, city1_id, city2_id):
     """
     Функция отображения сравнения городов.
@@ -123,7 +182,7 @@ def compareCity(request, city1_id, city2_id):
         request,
         'compareCity.html',
         context={'cities': cities, "listInd": indicators, "total": total, "totalCategory": tmp,
-                 "perfect": perfTotal, "perfectCategory": perfTotalCategory, "sumVal": sumval,},
+                 "perfect": perfTotal, "perfectCategory": perfTotalCategory, "sumVal": sumval, },
     )
 
 
@@ -139,7 +198,8 @@ def updateListCities(request):
     for i in TypeCity.objects.all():
         toDecSystem(num, i.id)
 
-    list = ListIndicators.objects.values('indicator__num', 'indicator__name').annotate(Count('indicator')).order_by('indicator__num')
+    list = ListIndicators.objects.values('indicator__num', 'indicator__name').annotate(Count('indicator')).order_by(
+        'indicator__num')
 
     """ 
     
@@ -182,7 +242,7 @@ def deleteDupData(request):
     for city in City.objects.values_list('name', flat=True).distinct():
         City.objects.filter(pk__in=City.objects.filter(name=city).values_list('id', flat=True)[1:]).delete()
     """
-    #l = ListIndicators.objects.filter(indicator__num=8).delete()
+    # l = ListIndicators.objects.filter(indicator__num=8).delete()
     pass
 
 

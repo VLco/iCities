@@ -28,6 +28,10 @@ def subtract(num1, num2):
     return num1 - num2
 
 @register.filter
+def cut_end(str):
+    print(str)
+
+@register.filter
 def sumVal(dictionary):
     sum = 0
     for i in dictionary.values():

@@ -1,0 +1,57 @@
+{% extends "base_generic.html" %}
+{% load custom %}
+{% block title %}
+    Рейтинг городов
+{% endblock %}
+{% block content %}
+    <div class="row">
+        <div class="col">
+            <h1>Рейтинг городов</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <h3>Фильтр:</h3>
+        </div>
+    </div>
+    <div class="row">
+        <form class="col" method="post">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-8">
+                    {% for type in types %}
+                        <div class="form-group form-inline form-check">
+                            {{ type }}
+                            {{ type.label_tag }}
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="col-4">
+                    <div class="form-group ">
+                        {{ clim }}
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary mb-2 ">Применить</button>
+        </form>
+    </div>
+
+
+    <div style="padding-top: 50px ">
+        {% for i in  list %}
+            <div class="row m-3">
+                <a class="btn d-flex flex-row btn-block justify-content-between btn-outline-info">
+                    <div class="">
+                        {{ i.name }}
+                    </div>
+                    <div class="">
+                        {{ list|get_item:i }}
+                    </div>
+                </a>
+
+            </div>
+
+        {% endfor %}
+    </div>
+{% endblock %}
