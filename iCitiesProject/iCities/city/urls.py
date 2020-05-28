@@ -8,5 +8,5 @@ urlpatterns = [
     path('<int:city1_id>vs<int:city2_id>', views.compareCity, name="compareCity"),
     path('upd', views.updateListCities, name="updList"),
     path('dnvd', views.deleteDupData, ),
-    path('rating', views.ratingList)
+    path('rating', views.ratingList, name="rating")
 ]

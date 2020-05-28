@@ -96,7 +96,6 @@ def ratingList(request):
     typeCity = 0
     if request.method == "POST" and types.is_valid() and clim.is_valid():
         typeCity = list()
-        print(request.POST)
         if 'ALL' not in request.POST.get('climate'):
             climate = request.POST.get('climate')
 
@@ -135,7 +134,6 @@ def ratingList(request):
     tmp.sort(key=lambda i: i[1])
     tmp.reverse()
     li = dict(tmp)
-    print(li)
     return render(
         request=request,
         template_name='ratingCities.html',
